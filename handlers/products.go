@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"coffee_tym/products"
+	"context"
 	"log"
 	"net/http"
 	"strconv"
@@ -10,21 +11,14 @@ import (
 	"github.com/gorilla/mux"
 )
 
+type Key struct{}
+
 type ProductsHandler struct {
 	l *log.Logger
 }
 
 func NewProductsHandler(l *log.Logger) *ProductsHandler {
 	return &ProductsHandler{l}
-}
-
-func (p *ProductsHandler) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
-	if r.Method == http.MethodPost {
-		p.postProduct(rw, r)
-		return
-	}
-
-	rw.WriteHeader(http.StatusOK)
 }
 
 func (p *ProductsHandler) PutProducts(rw http.ResponseWriter, r *http.Request) {
@@ -47,15 +41,8 @@ func (p *ProductsHandler) PutProducts(rw http.ResponseWriter, r *http.Request) {
 	rw.WriteHeader(http.StatusOK)
 }
 
-func (p *ProductsHandler) postProduct(rw http.ResponseWriter, r *http.Request) {
-	var prod products.Product
-	err := prod.FromJSON(r.Body)
-
-	if err != nil || !prod.Validate() {
-		rw.WriteHeader(http.StatusBadRequest)
-		p.l.Println(err)
-		return
-	}
+func (p *ProductsHandler) PostProduct(rw http.ResponseWriter, r *http.Request) {
+	prod := r.Context().Value(Key{}).(products.Product)
 
 	prod.ID = len(products.ProductList) + 1
 	prod.CreatedOn = time.Now().UTC().String()
@@ -75,4 +62,28 @@ func (p *ProductsHandler) GetProducts(rw http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func (p ProductsHandler) ProdValMW(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		prod := products.Product{}
+		err := prod.FromJSON(r.Body)
+		if err != nil {
+			http.Error(rw, "failed to unmarshall json", http.StatusBadRequest)
+			return
+		}
+
+		if r.Method == http.MethodPost && !prod.Validate() {
+			http.Error(rw, "Invalid product json", http.StatusBadRequest)
+			return
+		}
+
+		req := r.WithContext(
+			context.WithValue(
+				r.Context(),
+				Key{},
+				prod))
+
+		next.ServeHTTP(rw, req)
+	})
 }

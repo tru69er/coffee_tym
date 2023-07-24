@@ -18,11 +18,13 @@ func main() {
 	ph := handlers.NewProductsHandler(l)
 	sm := mux.NewRouter()
 
-	putRouter := sm.Methods(http.MethodPut).Subrouter()
-	putRouter.HandleFunc("/{id:[0-9]+}", ph.PutProducts)
+	sm.Methods(http.MethodGet).Subrouter().HandleFunc("/products", ph.GetProducts)
 
-	getRouter := sm.Methods(http.MethodGet).Subrouter()
-	getRouter.HandleFunc("/products", ph.GetProducts)
+	putRouter := sm.Methods(http.MethodPost).Subrouter()
+	putRouter.HandleFunc("/products", ph.PostProduct)
+	putRouter.Use(ph.ProdValMW)
+
+	sm.Methods(http.MethodPut).Subrouter().HandleFunc("/{id:[0-9]+}", ph.PutProducts)
 
 	handler := cors.AllowAll().Handler(sm)
 

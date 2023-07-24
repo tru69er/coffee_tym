@@ -3,7 +3,6 @@ package products
 import (
 	"encoding/json"
 	"io"
-	"log"
 	"time"
 )
 
@@ -63,7 +62,6 @@ func Find(id int) *Product {
 }
 
 func (p *Product) Validate() bool {
-	log.Println(p)
 	return (p.Name != "" && p.Desc != "" && p.Price > 0)
 }
 
