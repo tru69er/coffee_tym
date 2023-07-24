@@ -14,7 +14,7 @@ type Product struct {
 	Price     float32 `json:"price"`
 	SKU       string  `json:"sku"`
 	CreatedOn string  `json:"-"`
-	UpdatedOn string  `json:"-"`
+	UpdatedOn string  `json:"updatedOn"`
 	DeletedOn string  `json:"-"`
 }
 
@@ -33,6 +33,26 @@ func (p *Products) ToJSON(w io.Writer) error {
 			rw.Write(send)
 		}
 	*/
+}
+
+func (p *Product) Update(new Product) {
+	changed := false
+	if new.Desc != "" && new.Desc != p.Desc {
+		changed = true
+		p.Desc = new.Desc
+	}
+	if new.Price != 0 && new.Price != p.Price {
+		changed = true
+		p.Price = new.Price
+	}
+	if new.Name != "" && new.Name != p.Name {
+		changed = true
+		p.Name = new.Name
+	}
+
+	if changed {
+		p.UpdatedOn = time.Now().UTC().String()
+	}
 }
 
 func (p *Products) Find(id int) *Product {
@@ -72,7 +92,7 @@ func GetProducts() Products {
 	return ProductList
 }
 
-var ProductList = Products {
+var ProductList = Products{
 	&Product{
 		ID:        1,
 		Name:      "Latte",

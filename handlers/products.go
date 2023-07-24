@@ -35,48 +35,30 @@ func (p *ProductsHandler) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	rw.WriteHeader(http.StatusOK)
 }
 
-func(p *ProductsHandler) putProducts(rw http.ResponseWriter, r *http.Request) {
+func (p *ProductsHandler) putProducts(rw http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()["id"]
 	if query == nil {
 		rw.WriteHeader(http.StatusBadRequest)
 		return
 	}
-
 	id, _ := strconv.Atoi(query[0])
 	if product := products.ProductList.Find(id); product == nil {
 		rw.WriteHeader(http.StatusBadRequest)
 		return
 	} else {
-		p.l.Println(product)
-		var update products.Product
-		err := update.FromJSON(r.Body)
-
+		var new products.Product
+		err := new.FromJSON(r.Body)
 		if err != nil {
+			p.l.Println(err)
 			rw.WriteHeader(http.StatusBadRequest)
 			return
 		}
-
-		changed := false
-		if(update.Desc != "") {
-			changed = true
-			product.Desc = update.Desc
-		}
-		if(update.Price != 0) {
-			changed = true
-			product.Price = update.Price
-		}
-		if(update.Name != "") {
-			changed = true
-			product.Name = update.Name
-		}
-
-		if(changed) {
-			product.UpdatedOn = time.Now().UTC().String()
-		}
+		p.l.Println("New Product ", new)
+		product.Update(new)
 	}
 }
 
-func(p *ProductsHandler) postProduct(rw http.ResponseWriter, r *http.Request) {
+func (p *ProductsHandler) postProduct(rw http.ResponseWriter, r *http.Request) {
 	var prod products.Product
 	err := prod.FromJSON(r.Body)
 
