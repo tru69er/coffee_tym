@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/gorilla/mux"
 )
 
 type ProductsHandler struct {
@@ -17,45 +19,32 @@ func NewProductsHandler(l *log.Logger) *ProductsHandler {
 }
 
 func (p *ProductsHandler) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
-	if r.Method == http.MethodGet {
-		p.getProducts(rw)
-		return
-	}
-
 	if r.Method == http.MethodPost {
 		p.postProduct(rw, r)
-		return
-	}
-
-	if r.Method == http.MethodPut {
-		p.putProducts(rw, r)
 		return
 	}
 
 	rw.WriteHeader(http.StatusOK)
 }
 
-func (p *ProductsHandler) putProducts(rw http.ResponseWriter, r *http.Request) {
-	query := r.URL.Query()["id"]
-	if query == nil {
-		rw.WriteHeader(http.StatusBadRequest)
-		return
-	}
-	id, _ := strconv.Atoi(query[0])
-	if product := products.ProductList.Find(id); product == nil {
+func (p *ProductsHandler) PutProducts(rw http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, _ := strconv.Atoi(vars["id"])
+
+	if prod := products.Find(id); prod == nil {
 		rw.WriteHeader(http.StatusBadRequest)
 		return
 	} else {
 		var new products.Product
 		err := new.FromJSON(r.Body)
+
 		if err != nil {
-			p.l.Println(err)
 			rw.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		p.l.Println("New Product ", new)
-		product.Update(new)
+		prod.Update(new)
 	}
+	rw.WriteHeader(http.StatusOK)
 }
 
 func (p *ProductsHandler) postProduct(rw http.ResponseWriter, r *http.Request) {
@@ -78,7 +67,7 @@ func (p *ProductsHandler) postProduct(rw http.ResponseWriter, r *http.Request) {
 	rw.WriteHeader(http.StatusOK)
 }
 
-func (p *ProductsHandler) getProducts(rw http.ResponseWriter) {
+func (p *ProductsHandler) GetProducts(rw http.ResponseWriter, r *http.Request) {
 	lp := products.GetProducts()
 
 	err := lp.ToJSON(rw)

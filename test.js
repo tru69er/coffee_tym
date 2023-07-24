@@ -4,8 +4,8 @@ async function doFetch() {
     price: 6.9,
   };
 
-  const f = await fetch("http://127.0.0.1:6969/products?id=1", {
-    method: "put",
+  const f = await fetch("http://127.0.0.1:6969/1", {
+    method: "PUT",
     body: JSON.stringify(req),
   });
 

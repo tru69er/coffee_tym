@@ -55,9 +55,9 @@ func (p *Product) Update(new Product) {
 	}
 }
 
-func (p *Products) Find(id int) *Product {
-	if id <= len(*p) {
-		return (*p)[id-1]
+func Find(id int) *Product {
+	if id <= len(ProductList) {
+		return (ProductList)[id-1]
 	}
 	return nil
 }

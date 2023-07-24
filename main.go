@@ -9,14 +9,20 @@ import (
 	"os/signal"
 	"time"
 
+	"github.com/gorilla/mux"
 	"github.com/rs/cors"
 )
 
 func main() {
 	l := log.New(os.Stdout, "", log.Default().Flags())
 	ph := handlers.NewProductsHandler(l)
-	sm := http.NewServeMux()
-	sm.Handle("/products", ph)
+	sm := mux.NewRouter()
+
+	putRouter := sm.Methods(http.MethodPut).Subrouter()
+	putRouter.HandleFunc("/{id:[0-9]+}", ph.PutProducts)
+
+	getRouter := sm.Methods(http.MethodGet).Subrouter()
+	getRouter.HandleFunc("/products", ph.GetProducts)
 
 	handler := cors.AllowAll().Handler(sm)
 
@@ -26,7 +32,7 @@ func main() {
 		ErrorLog:     l,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
-		IdleTimeout:  120 * time.Second,
+		IdleTimeout:  1e0 * time.Second,
 	}
 
 	go func() {
