@@ -1,6 +1,5 @@
 async function doFetch() {
   const req = {
-    name: "Cappuccino",
     desc: "3ple espresso shot + hot milk",
     price: 6.9,
   };
@@ -10,7 +9,7 @@ async function doFetch() {
     body: JSON.stringify(req),
   });
 
-  console.log(f.statusText);
+  await console.log(await f.text())
 }
 
 doFetch();

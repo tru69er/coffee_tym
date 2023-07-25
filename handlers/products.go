@@ -73,9 +73,11 @@ func (p ProductsHandler) ProdValMW(next http.Handler) http.Handler {
 			return
 		}
 
-		if r.Method == http.MethodPost && !prod.Validate() {
-			http.Error(rw, "Invalid product json", http.StatusBadRequest)
-			return
+		if r.Method == http.MethodPost {
+			if err := prod.Validate(); err != nil {
+				http.Error(rw, err.Error(), http.StatusBadRequest)
+				return
+			}
 		}
 
 		req := r.WithContext(

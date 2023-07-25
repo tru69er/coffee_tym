@@ -4,10 +4,12 @@ import (
 	"encoding/json"
 	"io"
 	"time"
+
+	"github.com/go-playground/validator/v10"
 )
 
 type Product struct {
-	ID        int     `json:"id"`
+	ID        int     `json:"id" validate:"required"`
 	Name      string  `json:"name"`
 	Desc      string  `json:"description"`
 	Price     float32 `json:"price"`
@@ -61,9 +63,14 @@ func Find(id int) *Product {
 	return nil
 }
 
-func (p *Product) Validate() bool {
-	return (p.Name != "" && p.Desc != "" && p.Price > 0)
+func (p *Product) Validate() error {
+	validate := validator.New()
+	return validate.Struct(p)
 }
+
+//func (p *Product) Validate() bool {
+//return (p.Name != "" && p.Desc != "" && p.Price > 0)
+//}
 
 func (p *Product) FromJSON(w io.Reader) error {
 	d := json.NewDecoder(w)
