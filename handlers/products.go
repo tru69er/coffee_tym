@@ -21,6 +21,20 @@ func NewProductsHandler(l *log.Logger) *ProductsHandler {
 	return &ProductsHandler{l}
 }
 
+func (p *ProductsHandler) DeleteProduct(rw http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, _ := strconv.Atoi(vars["id"])
+
+	products.ProductList = append(products.ProductList[:id-1], products.ProductList[id:]...)
+
+	for i := id - 1; i < len(products.ProductList); i++ {
+		products.ProductList[i].ID--
+	}
+	// 0 1 2 3
+	// 1 2 3 4
+	// 1 3 4
+}
+
 func (p *ProductsHandler) PutProducts(rw http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, _ := strconv.Atoi(vars["id"])

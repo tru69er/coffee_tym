@@ -26,6 +26,8 @@ func main() {
 
 	sm.Methods(http.MethodPut).Subrouter().HandleFunc("/{id:[0-9]+}", ph.PutProducts)
 
+	sm.Methods(http.MethodDelete).Subrouter().HandleFunc("/{id:[0-9]+}", ph.DeleteProduct)
+
 	handler := cors.AllowAll().Handler(sm)
 
 	server := http.Server{

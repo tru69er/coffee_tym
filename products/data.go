@@ -9,10 +9,10 @@ import (
 )
 
 type Product struct {
-	ID        int     `json:"id" validate:"required"`
-	Name      string  `json:"name"`
-	Desc      string  `json:"description"`
-	Price     float32 `json:"price"`
+	ID        int     `json:"id"`
+	Name      string  `json:"name" validate:"required"`
+	Desc      string  `json:"desc" validate:"required"`
+	Price     float32 `json:"price" validate:"required"`
 	SKU       string  `json:"sku"`
 	CreatedOn string  `json:"-"`
 	UpdatedOn string  `json:"updatedOn"`
