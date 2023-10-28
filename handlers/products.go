@@ -17,22 +17,17 @@ func NewProductsHandler(l *log.Logger) *ProductsHandler {
 }
 
 func (p *ProductsHandler) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
-	if r.Method == http.MethodGet {
+	switch r.Method {
+	case http.MethodGet:
 		p.getProducts(rw)
-		return
-	}
-
-	if r.Method == http.MethodPost {
+	case http.MethodPost:
 		p.postProduct(rw, r)
-		return
-	}
-
-	if r.Method == http.MethodPut {
+	case http.MethodPut:
 		p.putProducts(rw, r)
+	default:
+		rw.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
-
-	rw.WriteHeader(http.StatusOK)
 }
 
 func (p *ProductsHandler) putProducts(rw http.ResponseWriter, r *http.Request) {
@@ -55,6 +50,7 @@ func (p *ProductsHandler) putProducts(rw http.ResponseWriter, r *http.Request) {
 		}
 		p.l.Println("New Product ", new)
 		product.Update(new)
+		rw.WriteHeader(http.StatusAccepted)
 	}
 }
 
@@ -80,7 +76,6 @@ func (p *ProductsHandler) postProduct(rw http.ResponseWriter, r *http.Request) {
 
 func (p *ProductsHandler) getProducts(rw http.ResponseWriter) {
 	lp := products.GetProducts()
-
 	err := lp.ToJSON(rw)
 
 	if err != nil {
